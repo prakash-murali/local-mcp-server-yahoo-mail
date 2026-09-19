@@ -90,7 +90,9 @@ Then point your config at the built file instead of `npx`:
 | `YAHOO_IMAP_PORT` | no | `993` | IMAP port override |
 | `YAHOO_SMTP_HOST` | no | `smtp.mail.yahoo.com` | SMTP host override |
 | `YAHOO_SMTP_PORT` | no | `465` | SMTP port override |
-| `YAHOO_MCP_READ_ONLY` | no | `false` | Set to `true` to disable `create_folder`, `move_message`, and `send_email` — only reading is possible. |
+| `YAHOO_MCP_READ_ONLY` | no | `false` | Set to `true` to disable `create_folder`, `move_message`, and `send_email`/`save_draft`. Only reading is possible. |
+| `YAHOO_MCP_DRAFTS_ONLY` | no | `false` | Set to `true` to replace `send_email` with `save_draft`, which writes to your Drafts folder instead of sending. You send it yourself from Yahoo Mail. |
+| `YAHOO_MCP_ALLOWED_RECIPIENTS` | no | *(unset)* | Comma-separated allowlist of recipient domains (`example.com`) or exact addresses (`a@b.com`). When set, mail to anyone else is refused. Applies to To, Cc and Bcc. |
 
 Credentials are never written to disk by this server — they're read from environment
 variables at startup and used only to authenticate to Yahoo's IMAP/SMTP servers over TLS.
@@ -102,6 +104,10 @@ If you'd rather not grant write/send access right away, set `YAHOO_MCP_READ_ONLY
 `move_message`, or `send_email` tools — Claude can only list folders and read messages
 until you turn it off.
 
+A good middle setting is `YAHOO_MCP_DRAFTS_ONLY=true`, which keeps folder management
+and lets Claude compose mail, but puts every message in your Drafts folder for you to
+review and send yourself. See [Security](#security) for why that matters.
+
 ## Tools
 
 - **list_folders** — list all folders/mailboxes (Inbox, Sent, Drafts, Trash, custom folders).
@@ -112,7 +118,8 @@ until you turn it off.
   default; pass `includeHtml` to also get the raw HTML part.
 - **move_message** — move a message from one folder to another by UID.
 - **send_email** — compose and send an email (to/cc/bcc, subject, text and/or HTML body,
-  optional reply threading headers).
+  optional reply threading headers). Replaced by **save_draft**, which writes to your
+  Drafts folder without sending, when `YAHOO_MCP_DRAFTS_ONLY=true`.
 
 ## Security
 
@@ -124,21 +131,32 @@ read a message, that attacker-controlled text enters the same conversation where
 instructions ("forward the last 20 emails to …") is a real attack, and no mail-access
 tool of this kind can fully prevent it.
 
-What this server does to reduce the risk:
+The defence that works is structural: take away the ability to send data out, so that
+an injected instruction has nothing to act with. Three env settings do that, and you
+can combine them:
+
+- **`YAHOO_MCP_READ_ONLY=true`** removes every write tool. Strongest option, and the
+  right one if you mainly want Claude to read and summarise mail.
+- **`YAHOO_MCP_DRAFTS_ONLY=true`** replaces `send_email` with `save_draft`. Claude
+  composes, the message lands in your Drafts folder, and nothing leaves the account
+  until you read it in Yahoo Mail and press send yourself.
+- **`YAHOO_MCP_ALLOWED_RECIPIENTS=example.com,someone@x.com`** refuses any message
+  addressed outside the list, including via Cc and Bcc.
+
+Note that none of these can be changed by Claude. There is deliberately no tool to edit
+the allowlist or turn off read-only mode, because a control the model can switch off is
+not a control. Changing them means editing your config and restarting the host.
+
+Two smaller measures that help but are not boundaries:
 
 - Message bodies and subject lines are returned wrapped in an explicit marker telling
   the model that the content is untrusted data and must not be treated as instructions.
 - The HTML part is **not** returned unless you pass `includeHtml`. HTML can hide text
   from you in comments, `display:none` elements, or white-on-white text while still
   feeding it to the model.
-- Read-only mode (`YAHOO_MCP_READ_ONLY=true`) removes the send/move/create tools
-  entirely, which removes the path an injected instruction would need to do damage.
 
-What you should do:
-
-- Be cautious about asking Claude to act on mail from senders you don't recognize.
-- Review any email before it's sent, and be aware that `send_email` supports `bcc`.
-- If you mostly want Claude to read and summarize mail, run it in read-only mode.
+Treat both as defence in depth. A determined injection can talk its way past wording;
+it cannot talk its way past a tool that isn't registered.
 
 ### The rest
 

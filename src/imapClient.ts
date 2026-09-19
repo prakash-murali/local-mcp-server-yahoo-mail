@@ -166,6 +166,19 @@ export async function getMessage(
   });
 }
 
+export async function appendDraft(
+  config: YahooConfig,
+  raw: Buffer
+): Promise<{ folder: string; uid?: number }> {
+  return withClient(config, async (client) => {
+    const mailboxes = await client.list();
+    const drafts =
+      mailboxes.find((mb) => mb.specialUse === "\\Drafts")?.path ?? "Drafts";
+    const result = await client.append(drafts, raw, ["\\Draft", "\\Seen"]);
+    return { folder: drafts, uid: result ? result.uid : undefined };
+  });
+}
+
 export async function moveMessage(
   config: YahooConfig,
   sourceFolder: string,

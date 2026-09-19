@@ -9,8 +9,9 @@ import {
   listMessages,
   getMessage,
   moveMessage,
+  appendDraft,
 } from "./imapClient.js";
-import { sendMail } from "./smtpClient.js";
+import { sendMail, buildDraft } from "./smtpClient.js";
 
 const config = loadConfig();
 
@@ -154,31 +155,54 @@ if (!config.readOnly) {
     }
   );
 
-  server.registerTool(
-    "send_email",
-    {
-      title: "Compose and send an email",
-      description: "Compose and send a new email from the configured Yahoo Mail account. Provide plain text and/or HTML body.",
-      inputSchema: {
-        to: z.string().min(1).describe("Recipient address(es), comma-separated for multiple."),
-        cc: z.string().optional().describe("CC address(es), comma-separated."),
-        bcc: z.string().optional().describe("BCC address(es), comma-separated."),
-        subject: z.string().min(1).describe("Email subject."),
-        text: z.string().optional().describe("Plain text body."),
-        html: z.string().optional().describe("HTML body."),
-        inReplyTo: z.string().optional().describe("Message-Id being replied to, for threading."),
-        references: z.string().optional().describe("References header value, for threading."),
+  const composeSchema = {
+    to: z.string().min(1).describe("Recipient address(es), comma-separated for multiple."),
+    cc: z.string().optional().describe("CC address(es), comma-separated."),
+    bcc: z.string().optional().describe("BCC address(es), comma-separated."),
+    subject: z.string().min(1).describe("Email subject."),
+    text: z.string().optional().describe("Plain text body."),
+    html: z.string().optional().describe("HTML body."),
+    inReplyTo: z.string().optional().describe("Message-Id being replied to, for threading."),
+    references: z.string().optional().describe("References header value, for threading."),
+  };
+
+  if (config.draftsOnly) {
+    server.registerTool(
+      "save_draft",
+      {
+        title: "Compose and save an email draft",
+        description:
+          "Compose an email and save it to the Drafts folder of the configured Yahoo Mail account. This does NOT send it: the account owner must review and send it themselves from Yahoo Mail.",
+        inputSchema: composeSchema,
       },
-    },
-    async ({ to, cc, bcc, subject, text, html, inReplyTo, references }) => {
-      try {
-        const result = await sendMail(config, { to, cc, bcc, subject, text, html, inReplyTo, references });
-        return jsonResult(result);
-      } catch (err) {
-        return errorResult(err);
+      async ({ to, cc, bcc, subject, text, html, inReplyTo, references }) => {
+        try {
+          const raw = await buildDraft(config, { to, cc, bcc, subject, text, html, inReplyTo, references });
+          const result = await appendDraft(config, raw);
+          return jsonResult({ ...result, sent: false });
+        } catch (err) {
+          return errorResult(err);
+        }
       }
-    }
-  );
+    );
+  } else {
+    server.registerTool(
+      "send_email",
+      {
+        title: "Compose and send an email",
+        description: "Compose and send a new email from the configured Yahoo Mail account. Provide plain text and/or HTML body.",
+        inputSchema: composeSchema,
+      },
+      async ({ to, cc, bcc, subject, text, html, inReplyTo, references }) => {
+        try {
+          const result = await sendMail(config, { to, cc, bcc, subject, text, html, inReplyTo, references });
+          return jsonResult(result);
+        } catch (err) {
+          return errorResult(err);
+        }
+      }
+    );
+  }
 }
 
 async function main() {
