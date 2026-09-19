@@ -1,0 +1,48 @@
+{
+  "name": "local-mcp-server-yahoo-mail",
+  "version": "1.0.0",
+  "description": "MCP server for Yahoo Mail (read, folders, move, compose/send) via IMAP/SMTP",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "local-mcp-server-yahoo-mail": "dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prakashmurali123/local-mcp-server-yahoo-mail.git"
+  },
+  "homepage": "https://github.com/prakashmurali123/local-mcp-server-yahoo-mail#readme",
+  "bugs": {
+    "url": "https://github.com/prakashmurali123/local-mcp-server-yahoo-mail/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "imapflow": "^1.0.176",
+    "mailparser": "^3.7.2",
+    "nodemailer": "^6.9.16",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/mailparser": "^3.4.6",
+    "@types/node": "^22.10.2",
+    "@types/nodemailer": "^6.4.17",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "yahoo-mail",
+    "claude",
+    "imap",
+    "smtp"
+  ]
+}
