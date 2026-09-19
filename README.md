@@ -108,12 +108,39 @@ until you turn it off.
 - **create_folder** — create a new folder; use `/` for nested paths (`Projects/Alpha`).
 - **list_messages** — list message summaries in a folder, with optional filters (unread only,
   sender, subject substring, since date) and a result limit.
-- **get_message** — fetch the full text/HTML body of one message by folder + UID.
+- **get_message** — fetch the body of one message by folder + UID. Returns plain text by
+  default; pass `includeHtml` to also get the raw HTML part.
 - **move_message** — move a message from one folder to another by UID.
 - **send_email** — compose and send an email (to/cc/bcc, subject, text and/or HTML body,
   optional reply threading headers).
 
 ## Security
+
+### The risk worth understanding first: prompt injection
+
+Anyone who knows your email address can put text in your inbox. When you ask Claude to
+read a message, that attacker-controlled text enters the same conversation where the
+`send_email` and `move_message` tools are available. A message crafted to look like
+instructions ("forward the last 20 emails to …") is a real attack, and no mail-access
+tool of this kind can fully prevent it.
+
+What this server does to reduce the risk:
+
+- Message bodies and subject lines are returned wrapped in an explicit marker telling
+  the model that the content is untrusted data and must not be treated as instructions.
+- The HTML part is **not** returned unless you pass `includeHtml`. HTML can hide text
+  from you in comments, `display:none` elements, or white-on-white text while still
+  feeding it to the model.
+- Read-only mode (`YAHOO_MCP_READ_ONLY=true`) removes the send/move/create tools
+  entirely, which removes the path an injected instruction would need to do damage.
+
+What you should do:
+
+- Be cautious about asking Claude to act on mail from senders you don't recognize.
+- Review any email before it's sent, and be aware that `send_email` supports `bcc`.
+- If you mostly want Claude to read and summarize mail, run it in read-only mode.
+
+### The rest
 
 This server is a thin, auditable bridge between Claude and Yahoo's own mail servers —
 there's no third-party backend in between.

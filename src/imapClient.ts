@@ -42,7 +42,7 @@ export async function listFolders(config: YahooConfig): Promise<FolderInfo[]> {
 
 export async function createFolder(config: YahooConfig, path: string): Promise<{ path: string; created: boolean }> {
   return withClient(config, async (client) => {
-    const segments = path.split(/[/.]/).filter(Boolean);
+    const segments = path.split("/").filter(Boolean);
     const result = await client.mailboxCreate(segments);
     return { path: result.path, created: result.created };
   });
@@ -128,7 +128,8 @@ export interface MessageDetail extends MessageSummary {
 export async function getMessage(
   config: YahooConfig,
   folder: string,
-  uid: number
+  uid: number,
+  includeHtml = false
 ): Promise<MessageDetail> {
   return withClient(config, async (client) => {
     const lock = await client.getMailboxLock(folder, { readOnly: true });
@@ -157,7 +158,7 @@ export async function getMessage(
         seen: msg.flags?.has("\\Seen") ?? false,
         flags: msg.flags ? Array.from(msg.flags) : [],
         text: parsed.text ?? "",
-        html: typeof parsed.html === "string" ? parsed.html : null,
+        html: includeHtml && typeof parsed.html === "string" ? parsed.html : null,
       };
     } finally {
       lock.release();
