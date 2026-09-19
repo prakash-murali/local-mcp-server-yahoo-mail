@@ -92,7 +92,6 @@ Then point your config at the built file instead of `npx`:
 | `YAHOO_SMTP_PORT` | no | `465` | SMTP port override |
 | `YAHOO_MCP_READ_ONLY` | no | `false` | Set to `true` to disable `create_folder`, `move_message`, and `send_email`/`save_draft`. Only reading is possible. |
 | `YAHOO_MCP_DRAFTS_ONLY` | no | `false` | Set to `true` to replace `send_email` with `save_draft`, which writes to your Drafts folder instead of sending. You send it yourself from Yahoo Mail. |
-| `YAHOO_MCP_ALLOWED_RECIPIENTS` | no | *(unset)* | Comma-separated allowlist of recipient domains (`example.com`) or exact addresses (`a@b.com`). When set, mail to anyone else is refused. Applies to To, Cc and Bcc. |
 
 Credentials are never written to disk by this server — they're read from environment
 variables at startup and used only to authenticate to Yahoo's IMAP/SMTP servers over TLS.
@@ -132,20 +131,17 @@ instructions ("forward the last 20 emails to …") is a real attack, and no mail
 tool of this kind can fully prevent it.
 
 The defence that works is structural: take away the ability to send data out, so that
-an injected instruction has nothing to act with. Three env settings do that, and you
-can combine them:
+an injected instruction has nothing to act with. Two env settings do that:
 
 - **`YAHOO_MCP_READ_ONLY=true`** removes every write tool. Strongest option, and the
   right one if you mainly want Claude to read and summarise mail.
 - **`YAHOO_MCP_DRAFTS_ONLY=true`** replaces `send_email` with `save_draft`. Claude
   composes, the message lands in your Drafts folder, and nothing leaves the account
   until you read it in Yahoo Mail and press send yourself.
-- **`YAHOO_MCP_ALLOWED_RECIPIENTS=example.com,someone@x.com`** refuses any message
-  addressed outside the list, including via Cc and Bcc.
 
-Note that none of these can be changed by Claude. There is deliberately no tool to edit
-the allowlist or turn off read-only mode, because a control the model can switch off is
-not a control. Changing them means editing your config and restarting the host.
+Note that neither can be changed by Claude. There is deliberately no tool to turn off
+read-only or drafts-only mode, because a control the model can switch off is not a
+control. Changing them means editing your config and restarting the host.
 
 Two smaller measures that help but are not boundaries:
 

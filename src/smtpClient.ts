@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
 import MailComposer from "nodemailer/lib/mail-composer/index.js";
-import addressparser from "nodemailer/lib/addressparser/index.js";
 import type { YahooConfig } from "./config.js";
 
 export interface SendMailOptions {
@@ -12,31 +11,6 @@ export interface SendMailOptions {
   html?: string;
   inReplyTo?: string;
   references?: string;
-}
-
-function isAllowed(address: string, allowed: string[]): boolean {
-  const addr = address.toLowerCase();
-  return allowed.some((entry) =>
-    entry.includes("@") ? addr === entry : addr.endsWith(`@${entry}`)
-  );
-}
-
-function assertRecipientsAllowed(config: YahooConfig, opts: SendMailOptions): void {
-  if (config.allowedRecipients.length === 0) return;
-
-  const recipients = [opts.to, opts.cc, opts.bcc]
-    .filter((field): field is string => !!field)
-    .flatMap((field) => addressparser(field))
-    .map((entry) => entry.address)
-    .filter((addr): addr is string => !!addr);
-
-  const blocked = recipients.filter((addr) => !isAllowed(addr, config.allowedRecipients));
-  if (blocked.length > 0) {
-    throw new Error(
-      `Recipient(s) not permitted by YAHOO_MCP_ALLOWED_RECIPIENTS: ${blocked.join(", ")}. ` +
-        `Allowed: ${config.allowedRecipients.join(", ")}.`
-    );
-  }
 }
 
 function toMailOptions(config: YahooConfig, opts: SendMailOptions) {
@@ -61,7 +35,6 @@ export async function sendMail(
   opts: SendMailOptions
 ): Promise<{ messageId: string }> {
   const mailOptions = toMailOptions(config, opts);
-  assertRecipientsAllowed(config, opts);
 
   const transporter = nodemailer.createTransport({
     host: config.smtpHost,
@@ -79,6 +52,5 @@ export async function buildDraft(
   opts: SendMailOptions
 ): Promise<Buffer> {
   const mailOptions = toMailOptions(config, opts);
-  assertRecipientsAllowed(config, opts);
   return new MailComposer(mailOptions).compile().build();
 }
