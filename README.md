@@ -37,23 +37,25 @@ your Claude config (`claude_desktop_config.json`, reachable from Claude Desktop'
       "args": ["-y", "local-mcp-server-yahoo-mail"],
       "env": {
         "YAHOO_EMAIL": "you@yahoo.com",
-        "YAHOO_APP_PASSWORD": "your-16-char-app-password"
+        "YAHOO_APP_PASSWORD": "your-16-char-app-password",
+        "YAHOO_MCP_DRAFTS_ONLY": "true"
       }
     }
   }
 }
 ```
 
-> **Consider starting in drafts-only mode.** Add `"YAHOO_MCP_DRAFTS_ONLY": "true"` to
-> that `env` block and Claude will compose mail into your Drafts folder instead of
-> sending it, leaving you to review and send from Yahoo Mail yourself. That one line is
-> the single most effective thing you can do to limit the damage a malicious email could
-> cause. See [Security](#security) for why, and for the stricter read-only option.
+> **Why `YAHOO_MCP_DRAFTS_ONLY` is in there by default.** With it set, Claude composes
+> mail into your Drafts folder rather than sending it, and you review and send from
+> Yahoo Mail yourself. That one line is the most effective thing you can do to limit
+> what a malicious email could make Claude do on your behalf, so it is the recommended
+> starting point. Delete the line once you are comfortable letting Claude send directly.
+> See [Security](#security) for the reasoning, and for the stricter read-only option.
 
 Or with the Claude Code CLI:
 
 ```bash
-claude mcp add yahoo-mail --env YAHOO_EMAIL=you@yahoo.com --env YAHOO_APP_PASSWORD=xxxxxxxxxxxxxxxx -- npx -y local-mcp-server-yahoo-mail
+claude mcp add yahoo-mail --env YAHOO_EMAIL=you@yahoo.com --env YAHOO_APP_PASSWORD=xxxxxxxxxxxxxxxx --env YAHOO_MCP_DRAFTS_ONLY=true -- npx -y local-mcp-server-yahoo-mail
 ```
 
 Fully quit and relaunch Claude Desktop afterward — MCP servers are only loaded at startup.
@@ -79,7 +81,8 @@ Then point your config at the built file instead of `npx`:
       "args": ["/absolute/path/to/local-mcp-server-yahoo-mail/dist/index.js"],
       "env": {
         "YAHOO_EMAIL": "you@yahoo.com",
-        "YAHOO_APP_PASSWORD": "your-16-char-app-password"
+        "YAHOO_APP_PASSWORD": "your-16-char-app-password",
+        "YAHOO_MCP_DRAFTS_ONLY": "true"
       }
     }
   }
