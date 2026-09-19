@@ -57,7 +57,7 @@ Fully quit and relaunch Claude Desktop afterward — MCP servers are only loaded
 Prefer to read and compile the code yourself before it touches your inbox:
 
 ```bash
-git clone https://github.com/prakashmurali123/local-mcp-server-yahoo-mail.git
+git clone https://github.com/prakash-murali/local-mcp-server-yahoo-mail.git
 cd local-mcp-server-yahoo-mail
 npm install
 npm run build

@@ -9,11 +9,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prakashmurali123/local-mcp-server-yahoo-mail.git"
+    "url": "git+https://github.com/prakash-murali/local-mcp-server-yahoo-mail.git"
   },
-  "homepage": "https://github.com/prakashmurali123/local-mcp-server-yahoo-mail#readme",
+  "homepage": "https://github.com/prakash-murali/local-mcp-server-yahoo-mail#readme",
   "bugs": {
-    "url": "https://github.com/prakashmurali123/local-mcp-server-yahoo-mail/issues"
+    "url": "https://github.com/prakash-murali/local-mcp-server-yahoo-mail/issues"
   },
   "scripts": {
     "build": "tsc",
