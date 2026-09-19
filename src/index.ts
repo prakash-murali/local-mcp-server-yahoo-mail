@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { createRequire } from "node:module";
 import { z } from "zod";
 import { loadConfig } from "./config.js";
 import {
@@ -15,9 +16,11 @@ import { sendMail, buildDraft } from "./smtpClient.js";
 
 const config = loadConfig();
 
+const { version } = createRequire(import.meta.url)("../package.json") as { version: string };
+
 const server = new McpServer({
   name: "yahoo-mail",
-  version: "1.0.0",
+  version,
 });
 
 function jsonResult(data: unknown) {

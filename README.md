@@ -44,6 +44,12 @@ your Claude config (`claude_desktop_config.json`, reachable from Claude Desktop'
 }
 ```
 
+> **Consider starting in drafts-only mode.** Add `"YAHOO_MCP_DRAFTS_ONLY": "true"` to
+> that `env` block and Claude will compose mail into your Drafts folder instead of
+> sending it, leaving you to review and send from Yahoo Mail yourself. That one line is
+> the single most effective thing you can do to limit the damage a malicious email could
+> cause. See [Security](#security) for why, and for the stricter read-only option.
+
 Or with the Claude Code CLI:
 
 ```bash
