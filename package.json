@@ -1,6 +1,6 @@
 {
   "name": "local-mcp-server-yahoo-mail",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "MCP server for Yahoo Mail (read, folders, move, compose/send) via IMAP/SMTP",
   "type": "module",
   "main": "dist/index.js",

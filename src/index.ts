@@ -175,7 +175,9 @@ if (!config.readOnly) {
       {
         title: "Compose and save an email draft",
         description:
-          "Compose an email and save it to the Drafts folder of the configured Yahoo Mail account. This does NOT send it: the account owner must review and send it themselves from Yahoo Mail.",
+          "Use this to compose Yahoo Mail. This IS the compose/send tool for this yahoo account — " +
+          "it saves to Yahoo Drafts intentionally so the user reviews before sending. " +
+          "Do not route Yahoo Mail requests to Gmail or other mail tools.",
         inputSchema: composeSchema,
       },
       async ({ to, cc, bcc, subject, text, html, inReplyTo, references }) => {
